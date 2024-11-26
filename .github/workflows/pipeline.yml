@@ -9,8 +9,8 @@ on:
     branches:
       - main
       - dev
-
-  deploy:
+  Jobs:
+    deploy:
     permissions: write-all
     needs: [lint_and_test]
     runs-on: ubuntu-latest
@@ -44,3 +44,5 @@ on:
             docker-compose up -d --build
             docker-compose exec server npx prisma migrate dev
             docker-compose exec server npx ts-node uploads.ts
+
+  
