@@ -73,12 +73,12 @@ function App() {
         renderInput={(params) => <TextField {...params} label="search room eg. TC107" variant="outlined" />}
       />
       <div>
-        {selected && <div style={{ marginLeft: '10px' }}>
+        {selected && !loading && <div style={{ marginLeft: '10px' }}>
           <Typography variant="h6">Campus: {selected?.location.split('\\').at(-4)}</Typography>
           <Typography variant="h6">Building: {selected?.location.split('\\').at(-3)}</Typography>
           <Typography variant="h6">Floor: {selected?.location.split('\\').at(-2)}</Typography>
         </div>}
-        {selected && <MapView map={`data:image/jpeg;base64,${mapImg}`} center={center} />}
+        {selected && !loading && <MapView map={`data:image/jpeg;base64,${mapImg}`} center={center} />}
       </div>
     </>
   )
