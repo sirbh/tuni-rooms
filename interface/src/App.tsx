@@ -70,7 +70,7 @@ function App() {
         getOptionLabel={(option) => option.line}
         getOptionKey={(option) => option.id}
         style={{ width: "80vw", margin: "10px 0px 20px 10px" }}
-        renderInput={(params) => <TextField {...params} label="search room" variant="outlined" />}
+        renderInput={(params) => <TextField {...params} label="search room eg. TC107" variant="outlined" />}
       />
       <div>
         {selected && <div style={{ marginLeft: '10px' }}>
