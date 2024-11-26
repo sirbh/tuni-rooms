@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=trustcar
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "trustcar@trustcar.fi"
+      PGADMIN_DEFAULT_PASSWORD: "password"
+    ports:
+      - 16543:80
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://trustcar:password@postgres:5432/trustcar
+      - MAP_PROCESSOR_URL=http://map-processor:8080
+
+  map-processor:
+    build:
+      context: ./mapProcessor
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
