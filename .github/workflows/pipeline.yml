@@ -45,6 +45,7 @@ jobs:
             git pull
             
             # Build the frontend
+            echo "Building the frontend"
             cd interface
             npm install
             npm run build
