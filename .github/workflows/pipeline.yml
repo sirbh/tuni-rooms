@@ -9,8 +9,8 @@ on:
     branches:
       - main
       - dev
-  Jobs:
-    deploy:
+Jobs:
+  deploy:
     permissions: write-all
     needs: [lint_and_test]
     runs-on: ubuntu-latest
