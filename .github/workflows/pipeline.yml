@@ -46,7 +46,9 @@ jobs:
             
             # Build the frontend
             echo "Building the frontend"
+            ls
             cd interface
+            ls
             npm install
             npm run build
             cp -r dist/* ../server/public/
