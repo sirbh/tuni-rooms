@@ -1,4 +1,4 @@
-name: Lint and Deploy Pipeline
+name: Deploy Pipeline
 
 on:
   pull_request:
@@ -9,21 +9,28 @@ on:
     branches:
       - main
       - dev
-Jobs:
+
+jobs:
   deploy:
     permissions: write-all
-    needs: [lint_and_test]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Deploy to production
         run: echo "Deploying to production"
 
-      - name: Deploy via SSH
+      - name: Configure SSH Key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: echo "$SSH_PRIVATE_KEY"
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
       - name: Run Command via SSH
         uses: appleboy/ssh-action@master
         with:
@@ -32,7 +39,7 @@ Jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd ~/app/tuni-rooms$
+            cd ~/app/tuni-rooms
             git checkout main
             git pull
             cd interface
@@ -44,5 +51,3 @@ Jobs:
             docker-compose up -d --build
             docker-compose exec server npx prisma migrate dev
             docker-compose exec server npx ts-node uploads.ts
-
-  
