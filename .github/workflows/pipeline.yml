@@ -39,15 +39,22 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            set -e # Exit immediately if a command fails
             cd ~/app/tuni-rooms
             git checkout main
             git pull
+            
+            # Build the frontend
             cd interface
             npm install
             npm run build
             cp -r dist/* ../server/public/
             cd ..
-            docker-compose down
+
+            # Handle Docker
+            docker-compose down || true # Ensure the stack stops
             docker-compose up -d --build
-            docker-compose exec server npx prisma migrate dev
-            docker-compose exec server npx ts-node uploads.ts
+            
+            # Migrations and uploads
+            docker-compose exec -T server npx prisma migrate dev
+            docker-compose exec -T server npx ts-node uploads.ts
