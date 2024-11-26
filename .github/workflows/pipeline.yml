@@ -40,15 +40,14 @@ jobs:
           port: 22
           script: |
             set -e # Exit immediately if a command fails
+            nvm use 18
             cd ~/app/tuni-rooms
             git checkout main
             git pull
             
             # Build the frontend
             echo "Building the frontend"
-            ls
             cd interface
-            ls
             npm install
             npm run build
             cp -r dist/* ../server/public/
