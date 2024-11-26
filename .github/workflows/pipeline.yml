@@ -60,4 +60,4 @@ jobs:
             
             # Migrations and uploads
             docker-compose exec -T server npx prisma migrate dev
-            docker-compose exec -T server npx ts-node uploads.ts
+            docker-compose exec -T server npx ts-node upload.ts
