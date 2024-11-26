@@ -1,0 +1,46 @@
+name: Lint and Deploy Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+  push:
+    branches:
+      - main
+      - dev
+
+  deploy:
+    permissions: write-all
+    needs: [lint_and_test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to production
+        run: echo "Deploying to production"
+
+      - name: Deploy via SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: echo "$SSH_PRIVATE_KEY"
+      - name: Run Command via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: 13.70.194.48
+          username: azureuser
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/app/tuni-rooms$
+            git checkout main
+            git pull
+            cd interface
+            npm install
+            npm run build
+            cp -r dist/* ../server/public/
+            cd ..
+            docker-compose down
+            docker-compose up -d --build
+            docker-compose exec server npx prisma migrate dev
+            docker-compose exec server npx ts-node uploads.ts
