@@ -40,7 +40,8 @@ jobs:
           port: 22
           script: |
             set -e # Exit immediately if a command fails
-            nvm use 18
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
             cd ~/app/tuni-rooms
             git checkout main
             git pull
