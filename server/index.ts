@@ -13,7 +13,6 @@ const prisma = new PrismaClient();
 
 app.use(cors());
 
-// Middleware to parse JSON
 app.use(express.json());
 
 app.use(express.static("public"));
@@ -43,13 +42,23 @@ app.post('/getmap', async (req: Request, res: Response) => {
     const { room,location } = req.body;
     
     try {
-      const data = await axios.post('/post',{
+      // const data = await axios.post('/highlight',{
+      //     room,
+      //     location: location.replace('C:\\Users\\soura\\OneDrive\\Desktop\\node\\maps\\', '').replace('.txt', '.pdf')
+      // })
+
+      const data = await axios.get('/highlight', {
+        params:{
           room,
           location: location.replace('C:\\Users\\soura\\OneDrive\\Desktop\\node\\maps\\', '').replace('.txt', '.pdf')
-      })
+        }
+      });
 
 
-      res.json({ room, location, image: data.data.image, cordinates: data.data.coordinates });
+    //  console.log(JSON.parse(data.data.coordinates)[0]);
+
+      // res.json({ room, location, image: data.data.image, cordinates: JSON.parse(data.data.coordinates) });
+      res.json({ room, location, image: data.data.image, cordinates: JSON.parse(data.data.coordinates) });
 
     } catch (error) {
       console.error(error); // Log the error for debugging
