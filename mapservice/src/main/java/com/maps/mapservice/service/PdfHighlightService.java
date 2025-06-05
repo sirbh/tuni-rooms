@@ -13,16 +13,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.maps.mapservice.dto.MapResponse;
 import com.maps.mapservice.util.StringMatcher;
 
 import lombok.RequiredArgsConstructor;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -37,8 +40,8 @@ public class PdfHighlightService {
 
     // Method to highlight text and return image as byte array
 
-    @Cacheable(value = "pdfCache", key = "#filePath + #searchText")
-    public byte[] highlightTextInPdf(String filePath, String searchText) throws IOException {
+   
+    private byte[] highlightTextInPdf(String filePath, String searchText) throws IOException {
         PDDocument document = Loader.loadPDF(new File(filePath));
         PDFTextStripper textStripper = new PDFTextStripper() {
             @Override
@@ -96,12 +99,24 @@ public class PdfHighlightService {
         return baos.toByteArray(); // Return image bytes
     }
 
-    public float convertPointsToPixels(float pointValue) {
+    private float convertPointsToPixels(float pointValue) {
         int dpi = 700;
         return pointValue * dpi / 72;
     }
 
-    public ArrayList<Float> getCoordinates() {
-        return coordinates; 
+    @Cacheable(value = "pdfCache", key = "#filePath + #searchText")
+    public MapResponse getMapWithCoordinates(String filePath, String searchText) throws IOException {
+        byte[] imageBytes = highlightTextInPdf(filePath, searchText);
+
+        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+        List<Float> coordinates = this.coordinates.stream()
+                .map(c -> convertPointsToPixels(c))
+                .toList();
+
+
+        return MapResponse.builder()
+                .image(base64Image)
+                .coordinates(coordinates)
+                .build();
     }
 }

@@ -14,7 +14,11 @@ public class GatewayConfiguration {
             .route("search", p -> p
                 .path("/search")
                 .uri("lb://handler"))
+            .route("getmap", p -> p
+                .path("/getmap")
+                .uri("lb://mapservice"))
             .build();
+
     }
     
 }

@@ -1,13 +1,12 @@
 package com.maps.mapservice.controller;
 
+
 import com.maps.mapservice.dto.HighlightRequest;
+import com.maps.mapservice.dto.MapResponse;
 import com.maps.mapservice.service.PdfHighlightService;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,21 +22,17 @@ public class MapsController {
 
 
     // Endpoint to highlight text and return an image
-    @GetMapping("/highlight")
-    public ResponseEntity<Map<String, String>> highlightText(@ModelAttribute HighlightRequest request) {
+    @GetMapping("/getmap")
+    public ResponseEntity<MapResponse> highlightText(@ModelAttribute HighlightRequest request) {
         String filePath = request.getLocation();
         String searchText = request.getRoom();
+        System.out.println("File Path: " + filePath);
         try {
-            // Call service method to highlight text and get the image as byte array
-            byte[] imageBytes = pdfHighlightService.highlightTextInPdf(filePath, searchText);
 
-            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 
-            // Construct the response map
-            Map<String, String> response = new HashMap<>();
-            response.put("image", base64Image);
+            MapResponse response = pdfHighlightService.getMapWithCoordinates(filePath, searchText);
 
-            response.put("coordinates", pdfHighlightService.getCoordinates().stream().map(c-> pdfHighlightService.convertPointsToPixels((c))).toList().toString());
+
 
             return ResponseEntity.ok(response);
 
