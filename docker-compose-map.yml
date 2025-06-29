@@ -35,7 +35,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-      - "8080:8080"  # exposed for external access
+      - "8081:8081"  # exposed for external access
 
   # ====================
   handler:
