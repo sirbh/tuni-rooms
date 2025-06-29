@@ -8,8 +8,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SERVER_PORT: 8761
-      EUREKA_REGISTER: false
-      EUREKA_FETCH: false
+      EUREKA_REGISTER: "false"
+      EUREKA_FETCH: "false"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 10s
