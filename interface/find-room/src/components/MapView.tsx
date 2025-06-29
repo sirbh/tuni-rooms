@@ -101,7 +101,7 @@ const MapView: React.FC<IMapViewProps> = ({ map, center }: IMapViewProps) => {
         }}>
             <div ref={imgRef} style={{ touchAction: "none", position: "absolute",left:position.x, top:position.y, transform:`scale(${scale})` }}>
             <img onLoad={()=>{setLoaded(true)}} src={map}  />
-            <Room style={{position:"absolute",left:center.x-40,top:center.y-50,color:"red",scale:'1'}} fontSize="large"/>
+            {/* <Room style={{position:"absolute",left:center.x-40,top:center.y-50,color:"red",scale:'1'}} fontSize="large"/> */}
             </div>
         </div>
     );

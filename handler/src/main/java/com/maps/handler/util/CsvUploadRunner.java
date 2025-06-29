@@ -1,27 +1,33 @@
-// package com.maps.handler.util;
+package com.maps.handler.util;
 
-// import com.maps.handler.service.LocationCsvUploader;
+import com.maps.handler.service.LocationCsvUploader;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
-// import lombok.RequiredArgsConstructor;
+import java.io.InputStream;
 
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.CommandLineRunner;
-// import org.springframework.stereotype.Component;
+@Component
+@RequiredArgsConstructor
+public class CsvUploadRunner implements CommandLineRunner {
 
-// @Component
-// @RequiredArgsConstructor
-// public class CsvUploadRunner implements CommandLineRunner {
+    private final LocationCsvUploader locationCsvUploader;
 
-//     @Autowired
-//     private LocationCsvUploader locationCsvUploader;
+    @Override
+    public void run(String... args) throws Exception {
+        System.out.println("🚀 Starting CSV upload...");
 
-//     @Override
-//     public void run(String... args) throws Exception {
-//         // You can pass the path here or get from args
-//         String csvPath = "output.csv"; 
+        // Load the file from classpath (e.g., src/main/resources/u_output.csv)
+        try (InputStream csvStream = getClass().getClassLoader().getResourceAsStream("u_output.csv")) {
+            if (csvStream == null) {
+                throw new RuntimeException("❌ u_output.csv not found in classpath!");
+            }
 
-//         System.out.println("Starting CSV upload...");
-//         locationCsvUploader.uploadCsv(csvPath);
-//         System.out.println("CSV upload completed.");
-//     }
-// }
+            locationCsvUploader.uploadCsv(csvStream);
+            System.out.println("✅ CSV upload completed.");
+        } catch (Exception e) {
+            System.err.println("❌ Error during CSV upload:");
+            e.printStackTrace();
+        }
+    }
+}

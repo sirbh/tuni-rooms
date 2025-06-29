@@ -1,0 +1,112 @@
+version: "3.8"
+
+services:
+  # ====================
+  discovery:
+    build:
+      context: ./discovery
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8761
+      EUREKA_REGISTER: false
+      EUREKA_FETCH: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ====================
+  gateway:
+    build:
+      context: ./gateway
+    depends_on:
+      discovery:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      APP_NAME: gateway
+      SERVER_PORT: 8080
+      EUREKA_HOST: discovery
+      EUREKA_PORT: 8761
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "8080:8080"  # exposed for external access
+
+  # ====================
+  handler:
+    build:
+      context: ./handler
+    depends_on:
+      discovery:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      APP_NAME: handler
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: tuni_maps
+      DB_USER: postgres
+      DB_PASS: postgres
+      EUREKA_HOST: discovery
+      EUREKA_PORT: 8761
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ====================
+  mapservice:
+    build:
+      context: ./mapservice
+    depends_on:
+      discovery:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      APP_NAME: mapservice
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      EUREKA_HOST: discovery
+      EUREKA_PORT: 8761
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ====================
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  # ====================
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: tuni_maps
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

@@ -21,8 +21,9 @@ import lombok.RequiredArgsConstructor;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -42,7 +43,20 @@ public class PdfHighlightService {
 
    
     private byte[] highlightTextInPdf(String filePath, String searchText) throws IOException {
-        PDDocument document = Loader.loadPDF(new File(filePath));
+        String rawPath = filePath+"floor.pdf";
+        if (rawPath.startsWith("\\") || rawPath.startsWith("/")) {
+            rawPath = rawPath.substring(1);
+        }
+
+        // Normalize separators and split path
+        String[] parts = rawPath.replace("\\", "/").split("/");
+
+        // Convert to Path
+        Path path = Paths.get(parts[0], java.util.Arrays.copyOfRange(parts, 1, parts.length));
+
+        // Use FileReader
+        
+        PDDocument document = Loader.loadPDF(path.toFile());
         PDFTextStripper textStripper = new PDFTextStripper() {
             @Override
             protected void processTextPosition(TextPosition text) {
@@ -106,6 +120,7 @@ public class PdfHighlightService {
 
     @Cacheable(value = "pdfCache", key = "#filePath + #searchText")
     public MapResponse getMapWithCoordinates(String filePath, String searchText) throws IOException {
+        System.out.println("File Path here is: " + filePath);
         byte[] imageBytes = highlightTextInPdf(filePath, searchText);
 
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);

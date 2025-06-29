@@ -10,7 +10,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 @Service
@@ -24,10 +26,13 @@ public class LocationCsvUploader {
     }
 
     @Transactional
-    public void uploadCsv(String csvFilePath) {
-        try (CSVReader reader = new CSVReaderBuilder(new FileReader(csvFilePath))
+    public void uploadCsv(InputStream csvInputStream) {
+        try (
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(csvInputStream));
+            CSVReader reader = new CSVReaderBuilder(bufferedReader)
                 .withCSVParser(new CSVParserBuilder().withSeparator(',').withEscapeChar('~').build())
-                .build()) {
+                .build()
+        ) {
             List<String[]> lines = reader.readAll();
             boolean isFirstLine = true;
 
