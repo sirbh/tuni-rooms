@@ -46,7 +46,7 @@ export function AutoComplete({options, inputValue, setInputValue, onValueSelect}
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command shouldFilter={false}>
-          <CommandInput placeholder="Search framework..." className="h-9" value={inputValue} onChangeCapture={(e)=>{
+          <CommandInput placeholder="Search Room..." className="h-9" value={inputValue} onChangeCapture={(e)=>{
              setInputValue(e.currentTarget.value)
           }} />
           <CommandList>
