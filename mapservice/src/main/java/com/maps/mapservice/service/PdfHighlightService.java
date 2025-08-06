@@ -37,12 +37,11 @@ public class PdfHighlightService {
     @Autowired
     private final StringMatcher matcher;
 
-    private ArrayList<Float> coordinates = new ArrayList<>(); // Store coordinates for future use
 
     // Method to highlight text and return image as byte array
 
    
-    private byte[] highlightTextInPdf(String filePath, String searchText) throws IOException {
+    private byte[] highlightTextInPdf(String filePath, String searchText, List<Float> coordinates) throws IOException {
         String rawPath = filePath+"floor.pdf";
         if (rawPath.startsWith("\\") || rawPath.startsWith("/")) {
             rawPath = rawPath.substring(1);
@@ -63,11 +62,11 @@ public class PdfHighlightService {
                 super.processTextPosition(text);
                 String result = matcher.appendCharacter(text.getUnicode().charAt(0), searchText);
                 if (result != null) {
-                    highlightWord(text, document);
+                    highlightWord(text, document, coordinates);
                 }
             }
 
-            private void highlightWord(TextPosition text, PDDocument document) {
+            private void highlightWord(TextPosition text, PDDocument document, List<Float> coordinates) {
                 try {
                     PDPage page = getCurrentPage();
                     PDPageContentStream contentStream = new PDPageContentStream(document, page, AppendMode.APPEND, true,
@@ -83,7 +82,6 @@ public class PdfHighlightService {
 
                     float correctedY = pageHeight - y;
 
-                    coordinates = new ArrayList<>();
                     coordinates.add(x);
                     coordinates.add(y);
 
@@ -120,18 +118,20 @@ public class PdfHighlightService {
 
     @Cacheable(value = "pdfCache", key = "#filePath + #searchText")
     public MapResponse getMapWithCoordinates(String filePath, String searchText) throws IOException {
+
+        List<Float> coordinates = new ArrayList<>();
         System.out.println("File Path here is: " + filePath);
-        byte[] imageBytes = highlightTextInPdf(filePath, searchText);
+        byte[] imageBytes = highlightTextInPdf(filePath, searchText, coordinates);
 
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-        List<Float> coordinates = this.coordinates.stream()
+        List<Float> converted = coordinates.stream()
                 .map(c -> convertPointsToPixels(c))
                 .toList();
 
 
         return MapResponse.builder()
                 .image(base64Image)
-                .coordinates(coordinates)
+                .coordinates(converted)
                 .build();
     }
 }
